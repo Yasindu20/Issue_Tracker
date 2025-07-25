@@ -21,7 +21,8 @@ const Navbar = () => {
       <nav className="navbar">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            🐛 Issue Tracker
+            <span>🐛</span>
+            <span>Issue Tracker</span>
           </Link>
           <div className="nav-menu">
             <Link 
@@ -46,7 +47,8 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="nav-container">
         <Link to="/dashboard" className="nav-logo">
-          🐛 Issue Tracker
+          <span>🐛</span>
+          <span>Issue Tracker</span>
         </Link>
         
         <div className={`nav-menu ${isMenuOpen ? 'active' : ''}`}>
@@ -55,27 +57,27 @@ const Navbar = () => {
             className={`nav-link ${isActive('/dashboard') ? 'active' : ''}`}
             onClick={() => setIsMenuOpen(false)}
           >
-            Dashboard
+            📊 Dashboard
           </Link>
           <Link 
             to="/issues" 
             className={`nav-link ${isActive('/issues') ? 'active' : ''}`}
             onClick={() => setIsMenuOpen(false)}
           >
-            Issues
+            📋 Issues
           </Link>
           <Link 
             to="/issues/new" 
             className={`nav-link ${isActive('/issues/new') ? 'active' : ''}`}
             onClick={() => setIsMenuOpen(false)}
           >
-            New Issue
+            ➕ New Issue
           </Link>
           
           <div className="nav-user">
-            <span className="user-greeting">Hello, {user?.username}!</span>
+            <span className="user-greeting">Hello, {user?.username}! 👋</span>
             <button onClick={handleLogout} className="logout-btn">
-              Logout
+              🚪 Logout
             </button>
           </div>
         </div>
