@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 import CustomDropdown from '../components/CustomDropdown';
@@ -14,6 +14,7 @@ const IssueList = () => {
     sortBy: 'createdAt',
     sortOrder: 'desc'
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({
     current: 1,
     pages: 1,
@@ -65,12 +66,7 @@ const IssueList = () => {
     { value: 'updatedAt-desc', label: 'Recently Updated', icon: '⏰' }
   ];
 
-  useEffect(() => {
-    fetchIssues();
-    fetchStats();
-  }, [filters, pagination.current]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await api.get('/issues?limit=1000');
       const allIssues = response.data.issues;
@@ -92,13 +88,13 @@ const IssueList = () => {
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     }
-  };
+  }, []);
 
-  const fetchIssues = async () => {
+  const fetchIssues = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
-        page: pagination.current,
+        page: currentPage,
         limit,
         ...filters
       });
@@ -112,21 +108,29 @@ const IssueList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, currentPage, addToast, limit]);
+
+  useEffect(() => {
+    fetchIssues();
+  }, [fetchIssues]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-    setPagination(prev => ({ ...prev, current: 1 }));
+    setCurrentPage(1);
   };
 
   const handleSortChange = (value) => {
     const [sortBy, sortOrder] = value.split('-');
     setFilters(prev => ({ ...prev, sortBy, sortOrder }));
-    setPagination(prev => ({ ...prev, current: 1 }));
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
-    setPagination(prev => ({ ...prev, current: page }));
+    setCurrentPage(page);
   };
 
   const getStatusColor = (status) => {
@@ -288,21 +292,21 @@ const IssueList = () => {
           {pagination.pages > 1 && (
             <div className="pagination">
               <button
-                onClick={() => handlePageChange(pagination.current - 1)}
-                disabled={pagination.current === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
                 className="pagination-btn"
               >
                 ← Previous
               </button>
               
               <div className="pagination-info">
-                Page {pagination.current} of {pagination.pages} 
+                Page {currentPage} of {pagination.pages} 
                 ({pagination.total} total issues)
               </div>
               
               <button
-                onClick={() => handlePageChange(pagination.current + 1)}
-                disabled={pagination.current === pagination.pages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === pagination.pages}
                 className="pagination-btn"
               >
                 Next →

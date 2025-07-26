@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -15,11 +15,7 @@ const IssueDetail = () => {
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState({});
 
-  useEffect(() => {
-    fetchIssue();
-  }, [id]);
-
-  const fetchIssue = async () => {
+  const fetchIssue = useCallback(async () => {
     try {
       const response = await api.get(`/issues/${id}`);
       setIssue(response.data);
@@ -40,7 +36,11 @@ const IssueDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, addToast, navigate]);
+
+  useEffect(() => {
+    fetchIssue();
+  }, [fetchIssue]);
 
   const handleEdit = () => {
     setEditing(true);
