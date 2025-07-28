@@ -99,6 +99,38 @@ issue-tracker/
     └── CONTRIBUTING.md              # Contribution guidelines
 ```
 
+📦 Dependencies
+Backend Dependencies
+{
+  "dependencies": {
+    "bcryptjs": "^3.0.2",           // Password hashing
+    "cors": "^2.8.5",               // Cross-origin resource sharing
+    "dotenv": "^17.2.0",            // Environment variable management
+    "express": "^4.18.2",           // Web framework
+    "jsonwebtoken": "^9.0.2",       // JWT token generation
+    "mongoose": "^8.16.4"           // MongoDB object modeling
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"           // Development server auto-restart
+  }
+}
+
+Frontend Dependencies
+{
+  "dependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.11.0",             // HTTP client for API calls
+    "react": "^19.1.0",             // UI library
+    "react-dom": "^19.1.0",         // React DOM rendering
+    "react-router-dom": "^7.7.0",   // Client-side routing
+    "react-scripts": "5.0.1",       // Build tools and configuration
+    "web-vitals": "^2.1.4"          // Performance metrics
+  }
+}
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -197,14 +229,8 @@ GET  /api/auth/me          # Get current user
 ## 🚀 Deployment
 
 ### Frontend Deployment (Vercel)
-1. Build the frontend: `npm run build`
-2. Deploy the `build` folder to your hosting service
-3. Set environment variables for API URL
 
 ### Backend Deployment (Railway)
-1. Set up MongoDB Compass
-2. Configure environment variables
-3. Deploy using your preferred cloud service
 
 ```
 
