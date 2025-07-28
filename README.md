@@ -101,23 +101,17 @@ issue-tracker/
 
 📦 Dependencies
 Backend Dependencies
-{
-  "dependencies": {
+
     "bcryptjs": "^3.0.2",           // Password hashing
     "cors": "^2.8.5",               // Cross-origin resource sharing
     "dotenv": "^17.2.0",            // Environment variable management
     "express": "^4.18.2",           // Web framework
     "jsonwebtoken": "^9.0.2",       // JWT token generation
     "mongoose": "^8.16.4"           // MongoDB object modeling
-  },
-  "devDependencies": {
     "nodemon": "^3.1.10"           // Development server auto-restart
-  }
-}
 
 Frontend Dependencies
-{
-  "dependencies": {
+
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -128,8 +122,7 @@ Frontend Dependencies
     "react-router-dom": "^7.7.0",   // Client-side routing
     "react-scripts": "5.0.1",       // Build tools and configuration
     "web-vitals": "^2.1.4"          // Performance metrics
-  }
-}
+
 
 ## 🚀 Quick Start
 
