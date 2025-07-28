@@ -14,7 +14,7 @@ const app = express();
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://issueTracker.vercel.app'] 
+    ? ['https://issue-tracker-inky.vercel.app'] 
     : 'http://localhost:3000',
   credentials: true
 }));
