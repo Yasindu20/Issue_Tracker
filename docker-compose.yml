@@ -32,7 +32,7 @@ services:
       target: dev
     container_name: issue-tracker-api
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - MONGODB_URI=mongodb+srv://issuetracker:Yasindu20@yasindu20.cu3x55i.mongodb.net/issuetracker?retryWrites=true&w=majority&appName=Yasindu20
       - JWT_SECRET=your-super-secret-jwt-key-here-make-it-long-and-complex
       - PORT=5000
