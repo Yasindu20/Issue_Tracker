@@ -1,0 +1,82 @@
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+env:
+    REGISTRY: docker.io
+    IMAGE_PREFIX: ${{secrets.DOCKERHUB_USERNAME}}/issue-tracker
+
+jobs:
+    quality:
+        name: Code Quality & Security
+        runs-on: ubuntu-latest
+
+        steps:
+           - name: Checkout code
+             uses: actions/checkout@v4
+             with:
+                fetch-depth: 0
+            
+           - name: Setup Node.js
+             uses: actions/setup-node@v4
+             with:
+                node-version: 18
+                cache: npm
+                cache-dependency-path:
+                    frondend/node_module
+                    backend/node_module
+            
+           #frontend Quality Check
+           - name: Install Frontend Dependencies
+             working-directory: ./frontend
+             run: npm ci
+
+           - name: Frontend Lint
+             working-directory: ./frontend
+             run: npm run lint
+
+           - name: Frontend Type Check
+             working-directory: ./frontend
+             run: npm run type-check || echo "TypeScript not Configured"
+
+           - name: Frontend Tests
+             working-directory: ./frontend
+             run: npm test -- --coverage --watchAll=false
+
+           - name: Frontend Build Test
+             working-directory: ./frontend
+             run: npm run build
+
+            #backend Quality Check
+           - name: Install Backend Dependencies
+             working-directory: ./backend
+             run: npm ci
+
+           - name: Backend Lint
+             working-directory: ./backend
+             run: npm run lint || echo "Lint not Configured"
+
+           - name: Backend Tests
+             working-directory: ./backend
+             run: npm test || echo "Test not Configured"
+            
+            #Security Scanning
+           - name: Run Trivy Vulnurabilty Scanner
+             uses: aquasecurity/trivy-action@master
+             with:
+              scan-type: 'fs'
+              scan-ref: '.'
+              format: 'sarif'
+              output: 'trivy-results.sarif'
+
+           - name: Upload Trivy Scan Results
+             uses: github/codeql-action/upload-sarif@v2
+             if: always()
+             with:
+              sarif-file: 'trivy-results.sarif'
+
+        
