@@ -13,6 +13,10 @@ terraform {
             source = "cloudflare/cloudflare"
             version = "~> 4.0"
         }
+        mongodbatlas = {
+            source = "mongodb/mongodbatlas"
+            version = "~> 1.0.0"
+        }
     }
 
     backend "local" {
@@ -31,6 +35,11 @@ provider "vercel" {
 
 provider "cloudflare" {
     api_token = var.cloudflare_token
+}
+
+provider "mongodbatlas" {
+    public_key = var.mongodb_public_key
+    private_key = var.mongodb_private_key
 }
 
 # railway backend Deployment
