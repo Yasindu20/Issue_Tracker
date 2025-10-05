@@ -1,16 +1,16 @@
 output "backend_url" {
     description = "Backend service URL"
-    value = "https://${railway_service.backend.domain}"
+    value = "https://${aws_instance.backend.public_ip}:3000"
 }
 
 output "frontend_url" {
     description = "Frontend Application URL"
-    value = "https://${vercel_project.frontend.domain}"
+    value = vercel_deployment.frontend_prod.url
 }
 
 output "mongodb_connection_string" {
     description = "Mongodb Connection String"
-    value = mongodbatlas_cluster.free_cluster.connection_string[0].standard_srv
+    value = mongodbatlas_cluster.free_cluster.connection_strings[0].standard_srv
     sensitive = true
 }
 
@@ -20,4 +20,9 @@ output "custom_domain" {
         frontend = "https://app.${var.domain_name}"
         backend = "https://api.${var.domain_name}"
     } : null
+}
+
+output "ec2_public_ip" {
+    description = "EC2 Public IP"
+    value = aws_instance.backend.public_ip
 }
