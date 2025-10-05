@@ -9,10 +9,10 @@ terraform {
             source = "vercel/vercel"
             version = "~> 2.0"
         }
-        cloudflare = {
-            source = "cloudflare/cloudflare"
-            version = "~> 4.0"
-        }
+        #cloudflare = {
+        #    source = "cloudflare/cloudflare"
+        #    version = "~> 4.0"
+        #}
         mongodbatlas = {
             source = "mongodb/mongodbatlas"
             version = "~> 1.0.0"
@@ -55,7 +55,7 @@ resource "aws_vpc" "main" {
     }
 }
 
-resource "aws_subset" "main" {
+resource "aws_subnet" "main" {
     vpc_id = aws_vpc.main.id
     cidr_block = "10.0.0.0/24"
     tags = {
@@ -72,8 +72,7 @@ resource "aws_internet_gateway" "main" {
 
 resource "aws_route_table" "main" {
     vpc_id = aws_vpc.main.id
-
-    route = {
+    route {
         cidr_block = "0.0.0.0/0"
         gateway_id = aws_internet_gateway.main.id
     }
@@ -84,7 +83,7 @@ resource "aws_route_table" "main" {
 }
 
 resource "aws_route_table_association" "main" {
-    subnet = aws_subnet.main.id
+    subnet_id = aws_subnet.main.id
     route_table_id = aws_route_table.main.id
 }
 
@@ -95,24 +94,24 @@ resource "aws_security_group" "backend" {
     vpc_id = aws_vpc.main.id
 
     ingress {
-        from port = 22
-        to port = 22
+        from_port = 22
+        to_port = 22
         protocol = "tcp"
-        cidr_block = ["0.0.0.0/0"] #SSH from anywhere
+        cidr_blocks = ["112.134.144.32/32"] #My IP address
     }
 
     ingress {
-        from port = 3000
-        to port = 3000
+        from_port = 3000
+        to_port = 3000
         protocol = "tcp"
-        cidr_block = ["0.0.0.0/0"] #App port
+        cidr_blocks = ["0.0.0.0/0"] #App port
     }
 
     egress {
-        from port = 0
-        to port = 0
+        from_port = 0
+        to_port = 0
         protocol = "-1"
-        cidr_block = ["0.0.0.0/0"]
+        cidr_blocks = ["0.0.0.0/0"]
     }
 
     tags = {
@@ -124,16 +123,19 @@ resource "aws_security_group" "backend" {
 resource "aws_instance" "backend" {
     ami = "ami-0c02fb55956c7d316" 
     instance_type = "t2.micro"
-    subset_id = aws_subset.main.id
+    subnet_id = aws_subnet.main.id
     vpc_security_group_ids = [aws_security_group.backend.id]
     key_name = var.aws_key_name
+    associate_public_ip_address = true
 
     user_data = <<-EOF
                 #!/bin/bash
-                apt-get update -y
-                apt-get install -y nodejs npm git
-                git_clone ${var.github_repo} /app
+                sudo yum update -y
+                sudo yum install -y nodejs npm git
+                git clone ${var.github_repo} /app
                 cd /app/backend
+                echo "MONGODB_URI=${var.mongodb_uri}" >> .env
+                echo "JWT_SECRET=${var.jwt_secret}" >> .env
                 npm install
                 npm install -g pm2  #process Manager for Node.js applications
                 pm2 start server.js --name "backend"
@@ -157,7 +159,7 @@ resource "mongodbatlas_cluster" "free_cluster" {
     name = "issue-tracker-free"
     provider_name = "TENANT"
     backing_provider_name = "AWS"
-    provider_region_name = "AP_SOUTH_1"
+    provider_region_name = "US_EAST_1"
     provider_instance_size_name = "M0"
 
     # free tier settings
