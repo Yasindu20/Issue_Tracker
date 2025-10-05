@@ -17,6 +17,10 @@ terraform {
             source = "mongodb/mongodbatlas"
             version = "~> 1.0.0"
         }
+        aws = { 
+            source = "hashicorp/aws"
+            version = "~> 5.0"
+        }
     }
 
     backend "local" {
@@ -24,78 +28,125 @@ terraform {
     }
 }
 
-# Configure the Railway provider
-provider "railway" {
-    token = var.railway_token
-}
-
 provider "vercel" {
     api_token = var.vercel_token
 }
 
-provider "cloudflare" {
-    api_token = var.cloudflare_token
-}
+#provider "cloudflare" {
+#    api_token = var.cloudflare_token
+#}
 
 provider "mongodbatlas" {
     public_key = var.mongodb_public_key
     private_key = var.mongodb_private_key
 }
 
-# railway backend Deployment
-resource "railway_project" "issue_tracker" {
-    name = "issue-tracker"
-    description = "Issue Tracker Application"
+provider "aws" {
+    region = var.aws_region
+    access_key = var.aws_access_key_id
+    secret_key = var.aws_secret_access_key
 }
 
-resource "railway_environment" "production" {
-    name = "production"
-    project_id = railway_project.issue_tracker.id
+# AWS VPC & Subnet 
+resource "aws_vpc" "main" {
+    cidr_block = "10.0.0.0/16"
+    tags = {
+        name = "issue_tracker_vpc"
+    }
 }
 
-resource "railway_service" "backend" {
-    name = "backend"
-    project_id = railway_project.issue_tracker.id
-    source_repo = var.github_repo
-    source_repo_branch = "main"
-    root_directory = "backend"
+resource "aws_subset" "main" {
+    vpc_id = aws_vpc.main.id
+    cidr_block = "10.0.0.0/24"
+    tags = {
+        name = "issue_tracker_subnet"
+    }
 }
 
-# Railway Service Domain
-resource "railway_service_domain" "backend" {
-    service_id = railway_service.backend.id
-    environment_id = railway_environment.production.id
-    subdomain = "api"
+resource "aws_internet_gateway" "main" {
+    vpc_id = aws_vpc.main.id
+    tags = {
+        Name = "issue_tracker_igw"
+    }
 }
 
-resource "railway_variable" "node_env" {
-    service_id = railway_service.backend.id
-    environment_id = railway_environment.production.id
-    name = "NODE_ENV"
-    value = "production"
+resource "aws_route_table" "main" {
+    vpc_id = aws_vpc.main.id
+
+    route = {
+        cidr_block = "0.0.0.0/0"
+        gateway_id = aws_internet_gateway.main.id
+    }
+
+    tags = {
+        Name = "issue_tracker_rt"
+    }
 }
 
-resource "railway_variable" "port" {
-    service_id = railway_service.backend.id
-    environment_id = railway_environment.production.id
-    name = "PORT"
-    value = "3000"
+resource "aws_route_table_association" "main" {
+    subnet = aws_subnet.main.id
+    route_table_id = aws_route_table.main.id
 }
 
-resource "railway_variable" "mongodb_url" {
-    service_id = railway_service.backend.id
-    environment_id = railway_environment.production.id
-    name = "MONGODB_URL"
-    value = var.mongodb_uri
+# AWS Security Group
+resource "aws_security_group" "backend" {
+    name = "issue-tracker-backend-sg"
+    description = "Allow inbound traffic for backend"
+    vpc_id = aws_vpc.main.id
+
+    ingress {
+        from port = 22
+        to port = 22
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"] #SSH from anywhere
+    }
+
+    ingress {
+        from port = 3000
+        to port = 3000
+        protocol = "tcp"
+        cidr_block = ["0.0.0.0/0"] #App port
+    }
+
+    egress {
+        from port = 0
+        to port = 0
+        protocol = "-1"
+        cidr_block = ["0.0.0.0/0"]
+    }
+
+    tags = {
+        name = "issue-tracker-backend-sg"
+    }
 }
 
-resource "railway_variable" "jwt_secret" {
-    service_id = railway_service.backend.id
-    environment_id = railway_environment.production.id
-    name = "JWT_SECRET"
-    value = var.jwt_secret
+# AWS EC2 Instance for Backend
+resource "aws_instance" "backend" {
+    ami = "ami-0c02fb55956c7d316" 
+    instance_type = "t2.micro"
+    subset_id = aws_subset.main.id
+    vpc_security_group_ids = [aws_security_group.backend.id]
+    key_name = var.aws_key_name
+
+    user_data = <<-EOF
+                #!/bin/bash
+                apt-get update -y
+                apt-get install -y nodejs npm git
+                git_clone ${var.github_repo} /app
+                cd /app/backend
+                npm install
+                npm install -g pm2  #process Manager for Node.js applications
+                pm2 start server.js --name "backend"
+                pm2 startup
+                pm2 save
+                EOF
+
+    tags = {
+        name = "issue-tracker-backend-instance"
+    }
 }
 
+# MongoDB Atlas
 resource "mongodbatlas_project" "issue_tracker" {
     name = "issue-tracker"
     org_id = var.mongodb_org_id
@@ -139,32 +190,35 @@ resource "vercel_deployment" "frontend_prod" {
 resource "vercel_project_environment_variable" "api_url" {
     project_id = vercel_project.frontend.id
     key = "REACT_APP_API_URL"
-    value = "https://${railway_service_domain.backend.domain}/api"
+    value = "https://${aws_instance.backend.public_ip}:3000/api"
     target = ["production"]
 }
 
 # cloudflare DNS
-resource "cloudflare_zone" "main" {
-    count = var.domain_name != "" ? 1 : 0
-    zone = var.domain_name
-    account_id = var.cloudflare_account_id
-}
+# resource "cloudflare_zone" "main" {
+#    provider = cloudflare
+#    count = var.domain_name != "" ? 1 : 0
+#    zone = var.domain_name
+#    account_id = var.cloudflare_account_id
+# }
 
-resource "cloudflare_record" "app" {
-    count = var.domain_name != "" ? 1 : 0
-    zone_id = cloudflare_zone.main[0].id
-    name = "app"
-    value = vercel_deployment.frontend_prod.url
-    type = "CNAME"
-    proxied = true
-}
+# resource "cloudflare_record" "app" {
+#    provider = cloudflare
+#    count = var.domain_name != "" ? 1 : 0
+#    zone_id = cloudflare_zone.main[0].id
+#    name = "app"
+#    value = vercel_deployment.frontend_prod.url
+#    type = "CNAME"
+#    proxied = true
+# }
 
-resource "cloudflare_record" "api" {
-    count = var.domain_name != "" ? 1 : 0
-    zone_id = cloudflare_zone.main[0].id
-    name = "api"
-    value = railway_service_domain.backend.domain
-    type = "CNAME"
-    proxied = true
-}
+# resource "cloudflare_record" "api" {
+#    provider = cloudflare
+#    count = var.domain_name != "" ? 1 : 0
+#    zone_id = cloudflare_zone.main[0].id
+#    name = "api"
+#    value = railway_service_domain.backend.domain
+#    type = "CNAME"
+#    proxied = true
+# }
 

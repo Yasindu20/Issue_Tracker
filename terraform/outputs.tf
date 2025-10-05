@@ -1,6 +1,6 @@
 output "backend_url" {
     description = "Backend service URL"
-    value = "https://${railway_service_domain.backend.domain}"
+    value = "https://${aws_instance.backend.public_ip}:3000"
 }
 
 output "frontend_url" {
@@ -20,4 +20,9 @@ output "custom_domain" {
         frontend = "https://app.${var.domain_name}"
         backend = "https://api.${var.domain_name}"
     } : null
+}
+
+output "ec2_public_ip" {
+    description = "EC2 Public IP"
+    value = aws_instance.backend.public_ip
 }

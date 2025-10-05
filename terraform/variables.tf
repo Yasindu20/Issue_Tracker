@@ -75,3 +75,28 @@ variable "environment" {
         error_message = "Environment must be one of 'development', 'staging', 'production'"
     }
 }
+
+#aws_variables
+variable "aws_access_key_id" {
+    description = "AWS Access Key ID"
+    type = string
+    sensitive = true
+}
+
+variable "aws_secret_access_key" {
+    description = "AWS Secret Access Key"
+    type = string
+    sensitive = true
+}
+
+variable "aws_region" {
+    description = "AWS Region"
+    type = string
+    default = "us-east-1"
+}
+
+variable "aws_key_name" {
+    description = "AWS EC2 key pair name #Optional for SSH access"
+    type = string
+    default = ""
+}
