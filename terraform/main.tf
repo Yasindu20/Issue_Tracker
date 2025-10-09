@@ -122,7 +122,7 @@ resource "aws_security_group" "backend" {
 # AWS EC2 Instance for Backend
 resource "aws_instance" "backend" {
     ami = "ami-0c02fb55956c7d316" 
-    instance_type = "t2.micro"
+    instance_type = "t3.micro"
     subnet_id = aws_subnet.main.id
     vpc_security_group_ids = [aws_security_group.backend.id]
     key_name = var.aws_key_name
@@ -161,13 +161,6 @@ resource "mongodbatlas_cluster" "free_cluster" {
     backing_provider_name = "AWS"
     provider_region_name = "US_EAST_1"
     provider_instance_size_name = "M0"
-
-    # free tier settings
-    disk_size_gb = 5
-
-    lifecycle {
-        ignore_changes = [disk_size_gb]
-    }
 }
 
 # vercel frontend Deployment
