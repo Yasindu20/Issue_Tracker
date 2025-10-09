@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: namespace
+metadata:
+  name: issue-tracker
+  labels:
+    name: issue-tracker
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-Config
+  namespace: issue-tracker
+data:
+  NODE_ENV: "production"
+  REACT_APP_API_URL: "http://localhost:8080/api"
+---
+
+apiVersion: v1
+kind: secret
+metadata:
+  name: app-secret
+  namespace: issue-tracker
+type: Opaque
+stringData:
+  mongodb-uri: "mongodb+srv://yasindudemel:Yasindu20@cluster0.srjxrwz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+  jwt-secret: "your-super-secret-jwt-key-here-make-it-long-and-complex"

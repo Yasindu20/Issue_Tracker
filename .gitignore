@@ -1,4 +1,5 @@
 terraform.tfvars
+terraform.tfstate.backup
 
 # Local .terraform directories
 .terraform/
