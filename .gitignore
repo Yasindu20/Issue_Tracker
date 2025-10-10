@@ -37,3 +37,6 @@ override.tf.json
 # OS-specific
 .DS_Store
 Thumbs.db
+
+# Kubernetes Secret
+k8s/mongodb-secret.yaml
