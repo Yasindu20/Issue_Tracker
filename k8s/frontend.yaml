@@ -8,11 +8,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-    matchLables:
+    matchLabels:
       app: frontend
-  templete:
+  template:
     metadata:
-      lables:
+      labels:
         app: frontend
     spec:
       containers:
@@ -58,7 +58,7 @@ spec:
 
 ---
 apiVersion: autoscaling/v2
-kinf: HorizontalPodAutoscaler
+kind: HorizontalPodAutoscaler
 metadata:
   name: frontend-hpa
   namespace: issue-tracker
@@ -75,10 +75,10 @@ spec:
         name: cpu
         target:
           type: utilization
-          avarageUtilization: 70
+          averageUtilization: 70
     - type: Resource
       resource:
         name: memory
         target:
           type: utilization
-          avarageUtilization: 80
+          averageUtilization: 80

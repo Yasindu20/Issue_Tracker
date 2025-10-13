@@ -3,15 +3,15 @@ kind: Ingress
 metadata:
   name: issue-tracker-Ingress
   namespace: issue-tracker
-  anootations:
+  annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrpyt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: nginx
   tls:
-    - hosts:
+    - host:
         - issue-tracker.issueTracker.com
       secretName: issue-tracker-tls
   rules:
@@ -19,17 +19,17 @@ spec:
         - issue-tracker.issueTracker.com
       http:
         paths:
-          path: /
-          pathType: prefix
-          backend:
-            service:
-              name: frontend-service
-              port: 
-                number: 80
-          path: /api
-          pathType: Prefix 
-          backend:
-            service:
-              name: backend-service
-              port:
-                number: 5000
+          - path: /
+            pathType: prefix
+            backend:
+              service:
+                name: frontend-service
+                port: 
+                  number: 80
+          - path: /api
+            pathType: Prefix 
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 5000
