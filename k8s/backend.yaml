@@ -10,26 +10,27 @@ spec:
   selector:
     matchLabels:
       app: backend
-  templete:
+  template:
     metadata:
       labels:
         app: backend
     spec:
       containers:
         - name: backend
-          image: yasindudemel/issue-tracker-backend:latest
+          image: yasindu20/issue-tracker-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            -containerPorts: 8080
+            - containerPort: 5000
           env:
             - name: NODE_ENV
               valueFrom:
                 configMapKeyRef:
-                  name: app-Config
+                  name: app-config
                   key: NODE_ENV
             - name: REACT_APP_API_URL
               valueFrom:
                 configMapKeyRef:
-                  name: app-Config
+                  name: app-config
                   key: REACT_APP_API_URL
             - name: JWT_SECRET
               valueFrom:
@@ -77,12 +78,12 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 5000
+      targetPort: 5000
       protocol: TCP
   type: ClusterIP
 
-  ---
+---
   apiVersion: autoscaling/v2
   kind: HorizontalPodAutoscaler
   metadata:
@@ -95,18 +96,18 @@ spec:
       name: backend
     minReplicas: 1
     maxReplicas: 5
-    matrics:
+    metrics:
       - type: Resource
         resource: 
           name: cpu
           target:
-            type: utilization
-            avarageUtilization: 70
+            type: Utilization
+            averageUtilization: 70
       - type: Resource
         resource:
           name: memory
           target:
-            type: utilization
-            avarageUtilization: 80
+            type: Utilization
+            averageUtilization: 80
 
   

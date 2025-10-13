@@ -8,16 +8,17 @@ metadata:
 spec:
   replicas: 2
   selector:
-    matchLables:
+    matchLabels:
       app: frontend
-  templete:
+  template:
     metadata:
-      lables:
+      labels:
         app: frontend
     spec:
       containers:
         - name: frontend
-          image: yasindudemel/issue-tracker-frontend:latest
+          image: yasindu20/issue-tracker-frontend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           resources:
@@ -58,7 +59,7 @@ spec:
 
 ---
 apiVersion: autoscaling/v2
-kinf: HorizontalPodAutoscaler
+kind: HorizontalPodAutoscaler
 metadata:
   name: frontend-hpa
   namespace: issue-tracker
@@ -74,11 +75,11 @@ spec:
       resource:
         name: cpu
         target:
-          type: utilization
-          avarageUtilization: 70
+          type: Utilization
+          averageUtilization: 70
     - type: Resource
       resource:
         name: memory
         target:
-          type: utilization
-          avarageUtilization: 80
+          type: Utilization
+          averageUtilization: 80

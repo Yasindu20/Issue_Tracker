@@ -9,7 +9,7 @@ metadata:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-Config
+  name: app-config
   namespace: issue-tracker
 data:
   NODE_ENV: "production"
