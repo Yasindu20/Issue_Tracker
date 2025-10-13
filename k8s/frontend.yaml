@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: yasindudemel/issue-tracker-frontend:latest
+          image: yasindu20/issue-tracker-frontend:latest
           ports:
             - containerPort: 80
           resources:

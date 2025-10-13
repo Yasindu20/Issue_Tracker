@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: yasindudemel/issue-tracker-backend:latest
+          image: yasindu20/issue-tracker-backend:latest
           ports:
             -containerPorts: 5000
           env:
