@@ -18,6 +18,7 @@ spec:
       containers:
         - name: frontend
           image: yasindu20/issue-tracker-frontend:latest
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
           resources:
@@ -74,11 +75,11 @@ spec:
       resource:
         name: cpu
         target:
-          type: utilization
+          type: Utilization
           averageUtilization: 70
     - type: Resource
       resource:
         name: memory
         target:
-          type: utilization
+          type: Utilization
           averageUtilization: 80

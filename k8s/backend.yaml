@@ -18,18 +18,19 @@ spec:
       containers:
         - name: backend
           image: yasindu20/issue-tracker-backend:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            -containerPorts: 5000
+            - containerPort: 5000
           env:
             - name: NODE_ENV
               valueFrom:
                 configMapKeyRef:
-                  name: app-Config
+                  name: app-config
                   key: NODE_ENV
             - name: REACT_APP_API_URL
               valueFrom:
                 configMapKeyRef:
-                  name: app-Config
+                  name: app-config
                   key: REACT_APP_API_URL
             - name: JWT_SECRET
               valueFrom:
@@ -77,12 +78,12 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 5000
+      targetPort: 5000
       protocol: TCP
   type: ClusterIP
 
-  ---
+---
   apiVersion: autoscaling/v2
   kind: HorizontalPodAutoscaler
   metadata:
@@ -100,13 +101,13 @@ spec:
         resource: 
           name: cpu
           target:
-            type: utilization
+            type: Utilization
             averageUtilization: 70
       - type: Resource
         resource:
           name: memory
           target:
-            type: utilization
+            type: Utilization
             averageUtilization: 80
 
   

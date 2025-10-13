@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: issue-tracker-Ingress
+  name: issue-tracker-ingress
   namespace: issue-tracker
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
@@ -11,16 +11,15 @@ metadata:
 spec:
   ingressClassName: nginx
   tls:
-    - host:
-        - issue-tracker.issueTracker.com
+    - hosts:
+        - issue-tracker.issuetracker.com
       secretName: issue-tracker-tls
   rules:
-    - hosts:
-        - issue-tracker.issueTracker.com
+    - host: issue-tracker.issuetracker.com
       http:
         paths:
           - path: /
-            pathType: prefix
+            pathType: Prefix
             backend:
               service:
                 name: frontend-service
