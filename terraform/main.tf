@@ -101,8 +101,8 @@ resource "aws_security_group" "backend" {
     }
 
     ingress {
-        from_port = 3000
-        to_port = 3000
+        from_port = 5000
+        to_port = 5000
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"] #App port
     }
@@ -121,7 +121,7 @@ resource "aws_security_group" "backend" {
 
 # AWS EC2 Instance for Backend
 resource "aws_instance" "backend" {
-    ami = "ami-0c02fb55956c7d316" 
+    ami = "ami-03f9680ef0c07a3d1" 
     instance_type = "t3.micro"
     subnet_id = aws_subnet.main.id
     vpc_security_group_ids = [aws_security_group.backend.id]
@@ -185,7 +185,7 @@ resource "vercel_deployment" "frontend_prod" {
 resource "vercel_project_environment_variable" "api_url" {
     project_id = vercel_project.frontend.id
     key = "REACT_APP_API_URL"
-    value = "https://${aws_instance.backend.public_ip}:3000/api"
+    value = "http://${aws_instance.backend.public_ip}:5000/api"
     target = ["production"]
 }
 
