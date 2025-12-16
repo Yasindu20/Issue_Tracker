@@ -97,12 +97,12 @@ resource "aws_security_group" "backend" {
         from_port = 22
         to_port = 22
         protocol = "tcp"
-        cidr_blocks = ["112.134.144.32/32"] #My IP address
+        cidr_blocks = ["0.0.0.0/0"] #My IP address
     }
 
     ingress {
-        from_port = 3000
-        to_port = 3000
+        from_port = 5000
+        to_port = 5000
         protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"] #App port
     }
@@ -121,7 +121,7 @@ resource "aws_security_group" "backend" {
 
 # AWS EC2 Instance for Backend
 resource "aws_instance" "backend" {
-    ami = "ami-0c02fb55956c7d316" 
+    ami = "ami-03f9680ef0c07a3d1" 
     instance_type = "t3.micro"
     subnet_id = aws_subnet.main.id
     vpc_security_group_ids = [aws_security_group.backend.id]
@@ -152,6 +152,12 @@ resource "aws_instance" "backend" {
 resource "mongodbatlas_project" "issue_tracker" {
     name = "issue-tracker"
     org_id = var.mongodb_org_id
+}
+
+resource "mongodbatlas_project_ip_access_list" "backend_access" {
+    project_id = mongodbatlas_project.issue_tracker.id
+    ip_address = aws_instance.backend.public_ip
+    comment    = "Allow access from Backend EC2"
 }
 
 resource "mongodbatlas_cluster" "free_cluster" {
@@ -185,7 +191,7 @@ resource "vercel_deployment" "frontend_prod" {
 resource "vercel_project_environment_variable" "api_url" {
     project_id = vercel_project.frontend.id
     key = "REACT_APP_API_URL"
-    value = "https://${aws_instance.backend.public_ip}:3000/api"
+    value = "http://${aws_instance.backend.public_ip}:5000/api"
     target = ["production"]
 }
 

@@ -26,3 +26,8 @@ output "ec2_public_ip" {
     description = "EC2 Public IP"
     value = aws_instance.backend.public_ip
 }
+
+output "ssh_connection" {
+    description = "SSH connection command"
+    value = "ssh -i ~/.ssh/issue-tracker-key.pem ec2-user@${aws_instance.backend.public_ip}"
+}
